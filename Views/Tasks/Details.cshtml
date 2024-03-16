@@ -17,6 +17,12 @@
             @Html.DisplayFor(model => model.TaskTitle)
         </dd>
         <dt class = "col-sm-2">
+            @Html.DisplayNameFor(model => model.TaskStatus)
+        </dt>
+        <dd class = "col-sm-10 status">
+            @Html.DisplayTextFor(model => model.TaskStatus)
+        </dd>
+        <dt class = "col-sm-2">
             @Html.DisplayNameFor(model => model.TaskDescription)
         </dt>
         <dd class = "col-sm-10">
@@ -34,3 +40,21 @@
     <a asp-action="Edit" asp-route-id="@Model?.TaskId">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    //console.log($(".status"));
+    $(".status").each(function (index) {
+        var text = $(this).text();
+        text = text.replace(/\s/g, '');
+        if (text == "True") {
+            $(this).html("Done");
+        }
+        else {
+            $(this).html("Pending");
+        }
+    })
+</script>

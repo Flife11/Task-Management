@@ -5,7 +5,7 @@
 }
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
 <table class="table">
     <thead>
@@ -30,27 +30,28 @@
         </tr>
     </thead>
     <tbody id="table-body">
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.TaskTitle)
-            </td>
-            <td class="status">
-                @Html.DisplayTextFor(modelItem => item.TaskStatus)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TaskDescription)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TaskDueDate)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.TaskId">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.TaskId">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.TaskId">Delete</a>
-            </td>
-        </tr>
-}
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskTitle)
+                </td>
+                <td class="status">
+                    @Html.DisplayTextFor(modelItem => item.TaskStatus)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskDescription)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskDueDate)
+                </td>
+                <td class="d-flex gap-2">
+                    <a asp-action="Edit" class="btn btn-primary" asp-route-id="@item.TaskId">Edit</a>
+                    <a asp-action="Details" class="btn btn-primary" asp-route-id="@item.TaskId">Details</a>
+                    <a asp-action="Delete" class="btn btn-primary" asp-route-id="@item.TaskId">Delete</a>
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
 
@@ -60,11 +61,15 @@
 
 <script type="text/javascript">
     // Handle checkbox display
-    $(".status").each(function(index) {     
+    $(".status").each(function (index) {
         var text = $(this).text();
-        text = text.replace(/\s/g, '');                
-        if (text == "True") $(this).html("Done");
-        else $(this).html("Pending");
+        text = text.replace(/\s/g, '');
+        if (text == "True") {
+            $(this).html("Done");
+        }
+        else {
+            $(this).html("Pending");
+        }
     })
 
     // handle filter submit
@@ -74,22 +79,33 @@
             $.ajax({
                 url: `http://localhost:5265/NewTask/Filter?title=${$("#title").val()}`,
                 method: "post",
-                context: {"title": $("#title").val()}
+                context: { "title": $("#title").val() }
             }).done(function (data) {
                 console.log(data);
-                var htmlText = data.map(d => {                                                   
-                    if (d.taskStatus == true) status = "Done";
-                    else status = "Pending";
+                var htmlText = data.map(d => {
+                    if (d.taskStatus == true) {
+                        status = "Done";
+                    }
+                    else {
+                        status = "Pending";
+                    }
+
                     return `
-                                <tr>
-                                    <td>${d.taskTitle}</td>
-                                    <td>${status}</td>
-                                    <td>${d.taskDescription}</td>
-                                    <td>${d.taskDueDate}</td>
-                                </tr>`
+                                    <tr>
+                                        <td>${d.taskTitle}</td>
+                                        <td>${status}</td>
+                                        <td>${d.taskDescription}</td>
+                                        <td>${d.taskDueDate}</td>
+                                        <td class="d-flex gap-2">
+                                            <a href="/Edit" class="btn btn-primary" >Edit</a>
+                                            <a href="/Details/${d.taskId}" class="btn btn-primary" >Details</a>
+                                            <a href="/Delete/${d.taskId}" class="btn btn-primary" >Delete</a>
+                                        </td>
+                                    </tr>`
                 }).join(" ");
+
                 $("#table-body").html(htmlText);
-            })  
+            })
         }
 
     });

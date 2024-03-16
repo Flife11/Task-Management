@@ -5,7 +5,7 @@ using Task = WebApplication2.Models.Task;
 
 namespace WebApplication2.Data
 {
-    public partial class ApplicationDbContext : DbContext
+    public partial class ApplicationDbContext : IdentityDbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

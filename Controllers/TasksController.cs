@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using SQLitePCL;
 using WebApplication2.Data;
 using WebApplication2.Models;
 using Task = WebApplication2.Models.Task;
@@ -23,22 +24,7 @@ namespace WebApplication2.Controllers
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
-            var TaskList = await _context.Task.ToListAsync();
-            return View(TaskList);
-        }
-
-        [HttpPost]
-        public async Task<List<Task>> Filter(String title)
-        {
-            var TaskList = await _context.Task.ToListAsync();
-            if (title == null)
-            {
-                return TaskList;
-            }
-            //Debug.WriteLine(title); 
-            var filterList = await _context.Task.Where(x => x.TaskTitle.ToLower().Contains(title.ToLower())).ToListAsync();
-            //Debug.WriteLine(filterList);
-            return filterList;
+            return View(await _context.Task.ToListAsync());
         }
 
         // GET: Tasks/Details/5
@@ -70,15 +56,21 @@ namespace WebApplication2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TaskId,TaskTitle,TaskDescription,TaskDueDate")] Task task)
+        public async Task<IActionResult> Create([Bind("TaskId,TaskTitle,TaskStatus,TaskDescription,TaskDueDate")] Models.Task task)
         {
-            if (ModelState.IsValid)
+            try
             {
-                _context.Add(task);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                if (ModelState.IsValid)
+                {
+                    _context.Add(task);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(task);
+            } catch (Exception ex)
+            {
+                throw;
             }
-            return View(task);
         }
 
         // GET: Tasks/Edit/5
@@ -102,7 +94,7 @@ namespace WebApplication2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("TaskId,TaskTitle,TaskDescription,TaskDueDate")] Task task)
+        public async Task<IActionResult> Edit(int id, [Bind("TaskId,TaskTitle,TaskStatus,TaskDescription,TaskDueDate")] Task task)
         {
             if (id != task.TaskId)
             {
@@ -155,14 +147,20 @@ namespace WebApplication2.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var task = await _context.Task.FindAsync(id);
-            if (task != null)
+            try
             {
-                _context.Task.Remove(task);
-            }
+                var task = await _context.Task.FindAsync(id);
+                if (task != null)
+                {
+                    _context.Task.Remove(task);
+                }
 
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            } catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         private bool TaskExists(int id)
