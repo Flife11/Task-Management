@@ -1,0 +1,86 @@
+﻿@model WebApplication2.Models.Task
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Task</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="TaskId" />
+            <div class="form-group">
+                <label asp-for="TaskTitle" class="control-label"></label>
+                <input asp-for="TaskTitle" class="form-control" />
+                <span asp-validation-for="TaskTitle" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label class="form-label">
+                    @Html.DisplayNameFor(model => model.TaskStatus)
+                </label>
+                <div class="d-flex gap-2">
+                    <input class="form-check-input" id="check-status" asp-for="TaskStatus" />
+                    <div class="status">
+                        @Html.DisplayTextFor(model => model.TaskStatus)
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskDescription" class="control-label"></label>
+                <input asp-for="TaskDescription" class="form-control" />
+                <span asp-validation-for="TaskDescription" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TaskDueDate" class="control-label"></label>
+                <input asp-for="TaskDueDate" class="form-control" />
+                <span asp-validation-for="TaskDueDate" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    //console.log($(".status"));
+    $(".status").each(function (index) {
+        var text = $(this).text();
+        console.log(text);
+        text = text.replace(/\s/g, '');
+        if (text == "True") {
+            $(this).html("Done");
+        }
+        else {
+            $(this).html("Pending");
+        }
+    })
+
+    $("#check-status").on("change", function () {
+        var value = this.checked;
+
+        if (value == false) {
+            $(".status").html("Pending");
+        }
+        else {
+            $(".status").html("Done");
+        }
+    })
+</script>
+    

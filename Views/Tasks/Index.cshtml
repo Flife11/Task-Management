@@ -1,0 +1,158 @@
+﻿@model IEnumerable<WebApplication2.Models.Task>
+
+@{
+    ViewData["Title"] = "Index";
+    if (ViewData["Perpage"] == null) ViewData["Perpage"] = 10;
+    if (ViewData["Page"] == null) ViewData["Page"] = 1;
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskTitle)
+                <div class="header-filter input-group" style="width: 15rem;">
+                    <input value="" name="title" id="title" class="form-control"
+                           placeholder="Task Title" type="text">
+                </div>
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskStatus)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskDescription)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.TaskDueDate)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody id="table-body">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskTitle)
+                </td>
+                <td class="status">
+                    @Html.DisplayTextFor(modelItem => item.TaskStatus)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskDescription)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.TaskDueDate)
+                </td>
+                <td class="d-flex gap-2">
+                    <a asp-action="Edit" class="btn btn-primary" asp-route-id="@item.TaskId">Edit</a>
+                    <a asp-action="Details" class="btn btn-primary" asp-route-id="@item.TaskId">Details</a>
+                    <a asp-action="Delete" class="btn btn-primary" asp-route-id="@item.TaskId">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="d-flex align-items-center justify-content-between">
+    <div class="d-flex align-items-center" style="gap: 5px">
+        <div><span>Hiển thị</span></div>        
+        <input name="limit" id="limit" class="form-control" style="width: 80px;" type="number" value="@ViewData["Perpage"]" />
+        <div>mỗi trang</div>
+    </div>
+    <div class="d-flex align-items-center" style="gap: 10px; font-size: 15px;">
+        <div class="prev">
+            <button id="previous-button">&lt;</button>
+        </div>
+        <div class="current">
+            <select id="page" class="form-control form-field" placeholder="@ViewData["Page"]" style="width: 50px;">
+                <option id="page-selected" selected="" value="" disabled="">@ViewData["Page"]</option>
+                @foreach (var i in Enumerable.Range(0, (int)@ViewData["Page"]))
+                {
+                    <option value="@i">@i+1</option>
+                }                
+            </select>
+        </div>
+        <div class="next">
+            <button id="next-button">&gt;</button>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+        crossorigin="anonymous"></script>
+
+<script type="text/javascript">
+    // Handle checkbox display
+    $(".status").each(function (index) {
+        var text = $(this).text();
+        text = text.replace(/\s/g, '');
+        if (text == "True") {
+            $(this).html("Done");
+        }
+        else {
+            $(this).html("Pending");
+        }
+    })
+
+    function HandleFilter() {       
+        let title = $("#title").val();
+        let page = $("#page").val();
+        let limit = $("#limit").val();
+        //get current url
+        let url = new URL(window.location.href);
+
+        //get the search parameters from the url
+        let params = new URLSearchParams(url.search);
+
+        //remove the filter parameters   
+        params.delete('title');
+        params.delete('page');
+        params.delete('limit'); //?
+
+        //add the filter parameters   
+        if (title)
+            params.set('title', title);
+        if (page)
+            params.set('page', page);
+        if (limit)
+            params.set('limit', limit);
+
+        //set the search parameters back to the url
+        url.search = params.toString();
+
+        //navigate to the new url
+        window.location.href = url.toString();
+    }
+
+    // handle filter submit
+    $(document).keypress(function (event) {
+        var keycode = (event.keyCode ? event.keyCode : event.which);
+        if (keycode == '13') {
+            HandleFilter();
+        }
+    });
+
+    $('#page').change(function() {
+        HandleFilter();
+    });
+    
+    $('#next-button').click(function() {  
+        let curpage = {{page}};
+        $('#page').val(parseInt(curpage)+1);        
+        $('#page-selected').val(parseInt(curpage)+1);
+        HandleFilter();
+    });
+
+    $('#previous-button').click(function() {
+        let curpage = {{page}};
+        $('#page').val(curpage-1);  
+        $('#page-selected').val(parseInt(curpage)-1);      
+        HandleFilter();
+    });
+
+</script>
