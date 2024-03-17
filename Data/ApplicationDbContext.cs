@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.Models;
 using Task = WebApplication2.Models.Task;
 
 namespace WebApplication2.Data
 {
-    public partial class ApplicationDbContext : IdentityDbContext
+    public partial class ApplicationDbContext : DbContext
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -15,9 +16,6 @@ namespace WebApplication2.Data
         public virtual DbSet<Task> Task { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(entity => {
-                entity.HasKey(k => k.UserId);
-            });
             modelBuilder.Entity<Task>(entity => {
                 entity.HasKey(k => k.TaskId);
             });

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
 using WebApplication2.Data;
 using WebApplication2.Models;
 using Task = WebApplication2.Models.Task;
@@ -24,7 +23,38 @@ namespace WebApplication2.Controllers
         // GET: Tasks
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Task.ToListAsync());
+            if (Request.Query.ContainsKey("title"))
+            {                
+                string title = Request.Query["title"];
+                ViewBag.title = title;
+            }
+            if (Request.Query.ContainsKey("page"))
+            {
+                string page = Request.Query["page"];
+                ViewBag.title = page;
+            }
+            if (Request.Query.ContainsKey("limit"))
+            {
+                string limit = Request.Query["limit"];
+                ViewBag.title = limit;
+            }
+            var TaskList = await _context.Task.ToListAsync();
+            return View(TaskList);
+        }
+
+        [HttpPost]
+        public async Task<List<Task>> Filter(String title)
+        {
+
+            var TaskList = await _context.Task.ToListAsync();
+            if (title == null)
+            {
+                return TaskList;
+            }
+            //Debug.WriteLine(title); 
+            var filterList = await _context.Task.Where(x => x.TaskTitle.ToLower().Contains(title.ToLower())).ToListAsync();
+            //Debug.WriteLine(filterList);
+            return filterList;
         }
 
         // GET: Tasks/Details/5
