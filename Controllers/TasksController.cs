@@ -7,55 +7,32 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication2.Data;
 using WebApplication2.Models;
+using WebApplication2.Services;
 using Task = WebApplication2.Models.Task;
 
 namespace WebApplication2.Controllers
 {
     public class TasksController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly TaskService _taskService;
 
-        public TasksController(ApplicationDbContext context)
+        public TasksController(TaskService taskService)
         {
-            _context = context;
+            _taskService = taskService;
         }
 
         // GET: Tasks
-        public async Task<IActionResult> Index()
-        {
-            if (Request.Query.ContainsKey("title"))
-            {                
-                string title = Request.Query["title"];
-                ViewBag.title = title;
-            }
-            if (Request.Query.ContainsKey("page"))
-            {
-                string page = Request.Query["page"];
-                ViewBag.title = page;
-            }
-            if (Request.Query.ContainsKey("limit"))
-            {
-                string limit = Request.Query["limit"];
-                ViewBag.title = limit;
-            }
-            var TaskList = await _context.Task.ToListAsync();
+        public async Task<IActionResult> Index(string title="", int page = 1, int limit = 10)
+        {            
+            var result = await _taskService.getTaskByTitleAndOffset(title, page, limit);
+            var TaskList = result.Item1;
+            var totalPage = result.Item2;
+            ViewBag.titleFilter = title;
+            ViewBag.page = page;
+            ViewBag.limit = limit;
+            ViewBag.totalPage = totalPage;            
             return View(TaskList);
-        }
-
-        [HttpPost]
-        public async Task<List<Task>> Filter(String title)
-        {
-
-            var TaskList = await _context.Task.ToListAsync();
-            if (title == null)
-            {
-                return TaskList;
-            }
-            //Debug.WriteLine(title); 
-            var filterList = await _context.Task.Where(x => x.TaskTitle.ToLower().Contains(title.ToLower())).ToListAsync();
-            //Debug.WriteLine(filterList);
-            return filterList;
-        }
+        }      
 
         // GET: Tasks/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -65,8 +42,7 @@ namespace WebApplication2.Controllers
                 return NotFound();
             }
 
-            var task = await _context.Task
-                .FirstOrDefaultAsync(m => m.TaskId == id);
+            var task = await _taskService.getTaskById(id);
             if (task == null)
             {
                 return NotFound();
@@ -86,14 +62,13 @@ namespace WebApplication2.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("TaskId,TaskTitle,TaskStatus,TaskDescription,TaskDueDate")] Models.Task task)
+        public IActionResult Create([Bind("TaskId,TaskTitle,TaskStatus,TaskDescription,TaskDueDate")] Models.Task task)
         {
             try
             {
                 if (ModelState.IsValid)
                 {
-                    _context.Add(task);
-                    await _context.SaveChangesAsync();
+                    _taskService.addTask(task);
                     return RedirectToAction(nameof(Index));
                 }
                 return View(task);
@@ -111,7 +86,7 @@ namespace WebApplication2.Controllers
                 return NotFound();
             }
 
-            var task = await _context.Task.FindAsync(id);
+            var task = await _taskService.getTaskById(id);
             if (task == null)
             {
                 return NotFound();
@@ -135,12 +110,11 @@ namespace WebApplication2.Controllers
             {
                 try
                 {
-                    _context.Update(task);
-                    await _context.SaveChangesAsync();
+                    _taskService.updateTask(task);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!TaskExists(task.TaskId))
+                    if (_taskService.TaskExists(task.TaskId))
                     {
                         return NotFound();
                     }
@@ -162,8 +136,7 @@ namespace WebApplication2.Controllers
                 return NotFound();
             }
 
-            var task = await _context.Task
-                .FirstOrDefaultAsync(m => m.TaskId == id);
+            var task = await _taskService.getTaskById(id);
             if (task == null)
             {
                 return NotFound();
@@ -179,23 +152,13 @@ namespace WebApplication2.Controllers
         {
             try
             {
-                var task = await _context.Task.FindAsync(id);
-                if (task != null)
-                {
-                    _context.Task.Remove(task);
-                }
-
-                await _context.SaveChangesAsync();
+                var task = await _taskService.getTaskById(id);
+                _taskService.deleteTask(task);
                 return RedirectToAction(nameof(Index));
             } catch (Exception ex)
             {
                 throw;
             }
-        }
-
-        private bool TaskExists(int id)
-        {
-            return _context.Task.Any(e => e.TaskId == id);
         }
     }
 }

@@ -2,8 +2,6 @@
 
 @{
     ViewData["Title"] = "Index";
-    if (ViewData["Perpage"] == null) ViewData["Perpage"] = 10;
-    if (ViewData["Page"] == null) ViewData["Page"] = 1;
 }
 
 <p>
@@ -15,7 +13,7 @@
             <th>
                 @Html.DisplayNameFor(model => model.TaskTitle)
                 <div class="header-filter input-group" style="width: 15rem;">
-                    <input value="" name="title" id="title" class="form-control"
+                    <input value="@ViewData["titleFilter"]" name="title" id="title" class="form-control"
                            placeholder="Task Title" type="text">
                 </div>
             </th>
@@ -60,7 +58,7 @@
 <div class="d-flex align-items-center justify-content-between">
     <div class="d-flex align-items-center" style="gap: 5px">
         <div><span>Hiển thị</span></div>        
-        <input name="limit" id="limit" class="form-control" style="width: 80px;" type="number" value="@ViewData["Perpage"]" />
+        <input name="limit" id="limit" class="form-control" style="width: 80px;" type="number" value="@ViewData["limit"]" />
         <div>mỗi trang</div>
     </div>
     <div class="d-flex align-items-center" style="gap: 10px; font-size: 15px;">
@@ -68,11 +66,11 @@
             <button id="previous-button">&lt;</button>
         </div>
         <div class="current">
-            <select id="page" class="form-control form-field" placeholder="@ViewData["Page"]" style="width: 50px;">
-                <option id="page-selected" selected="" value="" disabled="">@ViewData["Page"]</option>
-                @foreach (var i in Enumerable.Range(0, (int)@ViewData["Page"]))
+            <select id="page" class="form-control form-field" placeholder="@ViewData["page"]" style="width: 50px;">
+                <option id="page-selected" selected="" value="" disabled="">@ViewData["page"]</option>
+                @foreach (var i in Enumerable.Range(1, (int)@ViewData["totalPage"]))
                 {
-                    <option value="@i">@i+1</option>
+                    <option value="@i">@(i)</option>
                 }                
             </select>
         </div>
@@ -115,12 +113,15 @@
         params.delete('limit'); //?
 
         //add the filter parameters   
-        if (title)
+        if (title) {
             params.set('title', title);
-        if (page)
+        }
+        if (page) {
             params.set('page', page);
-        if (limit)
+        }
+        if (limit) {
             params.set('limit', limit);
+        }
 
         //set the search parameters back to the url
         url.search = params.toString();
@@ -133,6 +134,7 @@
     $(document).keypress(function (event) {
         var keycode = (event.keyCode ? event.keyCode : event.which);
         if (keycode == '13') {
+            console.log(1);
             HandleFilter();
         }
     });
@@ -142,15 +144,15 @@
     });
     
     $('#next-button').click(function() {  
-        let curpage = {{page}};
+        let curpage = @ViewData["page"];
         $('#page').val(parseInt(curpage)+1);        
         $('#page-selected').val(parseInt(curpage)+1);
         HandleFilter();
     });
 
     $('#previous-button').click(function() {
-        let curpage = {{page}};
-        $('#page').val(curpage-1);  
+        let curpage = @ViewData["page"];
+        $('#page').val(curpage-1);
         $('#page-selected').val(parseInt(curpage)-1);      
         HandleFilter();
     });
