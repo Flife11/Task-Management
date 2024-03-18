@@ -5,7 +5,7 @@ using WebApplication2.Models;
 
 namespace WebApplication2.Controllers
 {
-    //[Authorize]
+    [Authorize]
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
@@ -13,8 +13,7 @@ namespace WebApplication2.Controllers
         public HomeController(ILogger<HomeController> logger)
         {
             _logger = logger;
-        }
-
+        }        
         public IActionResult Index()
         {
             return View();
